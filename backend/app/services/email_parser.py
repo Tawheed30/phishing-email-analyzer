@@ -3,9 +3,9 @@ Parses raw RFC-2822 email strings into a structured ParsedEmail model.
 Uses only the stdlib `email` package — no external dependencies.
 """
 
-import re
 import email as _email
 import email.policy
+import re
 from email.message import Message
 from typing import List, Optional, Tuple
 

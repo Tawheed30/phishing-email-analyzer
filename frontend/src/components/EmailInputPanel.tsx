@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SAMPLES } from "../data/samples.js";
+import { SAMPLES } from "../data/samples";
 
 const MAX_CHARS = 500_000;
 const WARN_MIN = 20;

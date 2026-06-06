@@ -9,7 +9,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from app.main import app
-from app.models.schemas import AnalysisResponse, IOC, MitreTTP
+from app.models.schemas import IOC, AnalysisResponse, MitreTTP
 from app.services.email_parser import EmailParser
 from tests.fixtures import CLEAN_EMAIL, PHISHING_EMAIL, SUSPICIOUS_EMAIL
 

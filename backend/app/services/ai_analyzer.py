@@ -10,7 +10,7 @@ import time
 import anthropic
 from fastapi import HTTPException
 
-from app.models.schemas import AnalysisResponse, IOC, MitreTTP, ParsedEmail
+from app.models.schemas import IOC, AnalysisResponse, MitreTTP, ParsedEmail
 
 logger = logging.getLogger(__name__)
 

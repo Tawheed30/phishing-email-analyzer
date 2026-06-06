@@ -1,5 +1,6 @@
-from pydantic import BaseModel, field_validator
 from typing import List, Optional
+
+from pydantic import BaseModel, field_validator
 
 EMAIL_MIN_CHARS = 10
 EMAIL_MAX_CHARS = 500_000

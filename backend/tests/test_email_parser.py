@@ -1,9 +1,9 @@
 from app.services.email_parser import EmailParser
 from tests.fixtures import (
     CLEAN_EMAIL,
-    SUSPICIOUS_EMAIL,
-    PHISHING_EMAIL,
     MISSING_HEADERS_EMAIL,
+    PHISHING_EMAIL,
+    SUSPICIOUS_EMAIL,
 )
 
 parser = EmailParser()

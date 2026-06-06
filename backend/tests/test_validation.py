@@ -1,7 +1,8 @@
 """Tests for EmailAnalysisRequest Pydantic validators (Phase 5)."""
 
 import pytest
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
+
 from app.main import app
 from app.models.schemas import EMAIL_MAX_CHARS, EMAIL_MIN_CHARS
 
@@ -34,8 +35,9 @@ async def test_exactly_min_length_passes():
     # EMAIL_MIN_CHARS stripped chars should pass
     payload = "x" * EMAIL_MIN_CHARS
     from unittest.mock import AsyncMock, patch
-    from app.services.email_parser import EmailParser
+
     from app.models.schemas import AnalysisResponse
+    from app.services.email_parser import EmailParser
 
     parsed = EmailParser().parse(payload)
     mock_resp = AnalysisResponse(
