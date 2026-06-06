@@ -72,13 +72,15 @@ class MitreTTP(BaseModel):
 
 
 class AnalysisResponse(BaseModel):
-    verdict: str                    # "phishing" | "suspicious" | "clean"
-    confidence: int                 # 0–100
+    verdict: str                        # "phishing" | "suspicious" | "clean" | "error"
+    confidence: int                     # 0–100
     summary: str
     red_flags: List[str]
     iocs: List[IOC]
     mitre_ttps: List[MitreTTP]
     recommendations: List[str]
+    analyst_notes: Optional[str] = None
+    processing_time_ms: int = 0
     parsed_email: ParsedEmail
 
 
