@@ -1,5 +1,7 @@
 import json
+
 import anthropic
+
 from app.models.schemas import AnalysisReport, IOCs, MitreAttack
 from app.utils.prompt import build_prompt
 

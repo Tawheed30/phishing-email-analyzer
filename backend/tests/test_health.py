@@ -1,8 +1,9 @@
 """Tests for the enhanced /health endpoint (Phase 5)."""
 
 import pytest
-from httpx import AsyncClient, ASGITransport
-from app.main import app, APP_VERSION
+from httpx import ASGITransport, AsyncClient
+
+from app.main import APP_VERSION, app
 
 TRANSPORT = ASGITransport(app=app)
 

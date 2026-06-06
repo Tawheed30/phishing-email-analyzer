@@ -2,7 +2,7 @@
 
 import pytest
 from fastapi import FastAPI
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
@@ -59,9 +59,10 @@ async def test_rate_limit_429_body_is_json():
 async def test_analyze_endpoint_respects_rate_limiter():
     """Verify the real /analyze endpoint has the limiter applied (returns 200 within limit)."""
     from unittest.mock import AsyncMock, patch
+
     from app.main import app
-    from app.services.email_parser import EmailParser
     from app.models.schemas import AnalysisResponse
+    from app.services.email_parser import EmailParser
 
     parsed = EmailParser().parse("From: test@test.com\n\nBody text here for test")
     mock_resp = AnalysisResponse(
