@@ -1,11 +1,24 @@
-import axios from "axios";
-import type { AnalysisReport } from "../types";
+import type { AnalysisResponse } from "../types";
 
-const client = axios.create({ baseURL: "/api/v1" });
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "";
 
-export async function analyzeEmail(rawEmail: string): Promise<AnalysisReport> {
-  const { data } = await client.post<AnalysisReport>("/analyze", {
-    raw_email: rawEmail,
-  });
-  return data;
+export async function analyzeEmail(rawEmail: string): Promise<AnalysisResponse> {
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_BASE}/api/v1/analyze`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ raw_email: rawEmail }),
+    });
+  } catch {
+    throw new Error("Backend unavailable — is the server running?");
+  }
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({ detail: response.statusText }));
+    throw new Error((body as { detail?: string }).detail ?? `HTTP ${response.status}`);
+  }
+
+  return response.json() as Promise<AnalysisResponse>;
 }
