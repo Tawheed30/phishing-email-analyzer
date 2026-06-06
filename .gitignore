@@ -5,12 +5,18 @@ __pycache__/
 .venv/
 dist/
 .env
+*.env
+backend/.env
 
 # Node
 node_modules/
 dist/
 .env.local
+.env.production
+.env.staging
 
 # Misc
 .DS_Store
 *.log
+*.key
+*.pem
