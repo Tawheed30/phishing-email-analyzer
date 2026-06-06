@@ -1,5 +1,14 @@
 # Phishing Email Analyzer
 
+![CI](https://github.com/Tawheed30/phishing-email-analyzer/actions/workflows/ci.yml/badge.svg)
+![Security Scan](https://github.com/Tawheed30/phishing-email-analyzer/actions/workflows/security.yml/badge.svg)
+![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green?logo=fastapi)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
+![Claude AI](https://img.shields.io/badge/Claude-AI-orange?logo=anthropic)
+![Tests](https://img.shields.io/badge/tests-137%20passing-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
 A full-stack web application that analyzes raw emails for phishing indicators using Claude AI. Paste any raw email (headers + body) and receive a structured threat report with verdict, confidence score, IOCs, MITRE ATT&CK mappings, and SOC-ready recommendations — in seconds.
 
 ---
