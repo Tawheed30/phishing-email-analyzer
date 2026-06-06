@@ -1,7 +1,9 @@
+import json
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 
+from app.limiter import ANALYZE_RATE_LIMIT, limiter
 from app.models.schemas import AnalysisResponse, EmailAnalysisRequest
 from app.services.ai_analyzer import AIAnalyzer
 from app.services.email_parser import EmailParser
@@ -14,17 +16,22 @@ _analyzer = AIAnalyzer()
 
 
 @router.post("/analyze", response_model=AnalysisResponse)
-async def analyze(payload: EmailAnalysisRequest):
-    if not payload.raw_email.strip():
-        raise HTTPException(status_code=422, detail="raw_email must not be empty")
+@limiter.limit(ANALYZE_RATE_LIMIT)
+async def analyze(request: Request, payload: EmailAnalysisRequest):
     try:
         parsed = _parser.parse(payload.raw_email)
         result = await _analyzer.analyze_with_claude(parsed)
         logger.info(
-            "analyze complete verdict=%s confidence=%s time_ms=%s",
-            result.verdict,
-            result.confidence,
-            result.processing_time_ms,
+            json.dumps({
+                "event": "analyze_complete",
+                "verdict": result.verdict,
+                "confidence": result.confidence,
+                "processing_time_ms": result.processing_time_ms,
+                "from": parsed.from_address,
+                "subject": parsed.subject[:80],
+                "ioc_count": len(result.iocs),
+                "ttp_count": len(result.mitre_ttps),
+            })
         )
         return result
     except HTTPException:

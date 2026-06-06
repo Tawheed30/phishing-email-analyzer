@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { SAMPLES } from "../data/samples.js";
 
+const MAX_CHARS = 500_000;
+const WARN_MIN = 20;
+
 interface Props {
   onSubmit: (email: string) => void;
   loading: boolean;
@@ -8,13 +11,30 @@ interface Props {
 
 type SampleKey = keyof typeof SAMPLES;
 
+function getSizeError(text: string): string | null {
+  if (text.length > MAX_CHARS)
+    return `Email exceeds 500KB limit (${text.length.toLocaleString()} chars — max ${MAX_CHARS.toLocaleString()})`;
+  return null;
+}
+
 export default function EmailInputPanel({ onSubmit, loading }: Props) {
   const [value, setValue] = useState("");
   const [sample, setSample] = useState<SampleKey>("phishing");
 
+  const sizeError = getSizeError(value);
+  const tooShortWarning = value.trim().length > 0 && value.trim().length < WARN_MIN;
+  const canSubmit = !loading && value.trim().length >= 1 && !sizeError;
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (value.trim() && !loading) onSubmit(value.trim());
+    if (canSubmit) onSubmit(value.trim());
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      if (canSubmit) onSubmit(value.trim());
+    }
   }
 
   function loadSample() {
@@ -46,6 +66,7 @@ export default function EmailInputPanel({ onSubmit, loading }: Props) {
             type="button"
             onClick={loadSample}
             disabled={loading}
+            data-testid="load-sample-button"
             className="text-xs font-mono px-3 py-1 rounded border border-cyber-border
                        text-gray-400 hover:text-cyber-cyan hover:border-cyber-cyan/50
                        transition-colors disabled:opacity-40"
@@ -60,33 +81,64 @@ export default function EmailInputPanel({ onSubmit, loading }: Props) {
           <textarea
             value={value}
             onChange={(e) => setValue(e.target.value)}
+            onKeyDown={handleKeyDown}
             disabled={loading}
             rows={14}
-            placeholder="Paste raw email here (headers + body)..."
+            placeholder="Paste raw email here (headers + body)... or use Ctrl+Enter to submit"
             data-testid="email-textarea"
-            className="w-full rounded border border-cyber-border bg-gray-950 px-4 py-3
-                       font-mono text-sm text-gray-200 placeholder-gray-700
-                       focus:border-cyber-cyan/40 focus:outline-none resize-y
-                       disabled:opacity-40 transition-colors"
+            className={`w-full rounded border bg-gray-950 px-4 py-3 font-mono text-sm
+                        text-gray-200 placeholder-gray-700 focus:outline-none resize-y
+                        disabled:opacity-40 transition-colors
+                        ${sizeError
+                          ? "border-cyber-red focus:border-cyber-red"
+                          : "border-cyber-border focus:border-cyber-cyan/40"
+                        }`}
           />
-          <span className="absolute bottom-2 right-3 text-xs font-mono text-cyber-muted">
-            {value.length.toLocaleString()} chars
+          <span
+            className={`absolute bottom-2 right-3 text-xs font-mono
+                        ${sizeError ? "text-cyber-red" : "text-cyber-muted"}`}
+          >
+            {value.length.toLocaleString()} / {MAX_CHARS.toLocaleString()} chars
           </span>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading || !value.trim()}
-          data-testid="analyze-button"
-          className="w-full sm:w-auto rounded border border-cyber-cyan bg-cyber-cyan/10
-                     px-6 py-2.5 font-mono text-sm font-semibold text-cyber-cyan
-                     tracking-widest uppercase transition-all
-                     hover:bg-cyber-cyan/20 hover:shadow-[0_0_20px_rgba(0,212,255,0.3)]
-                     disabled:opacity-30 disabled:cursor-not-allowed
-                     animate-pulse-glow"
-        >
-          {loading ? "ANALYZING…" : "ANALYZE THREAT"}
-        </button>
+        {/* Validation messages */}
+        {sizeError && (
+          <p data-testid="size-error" className="text-xs font-mono text-cyber-red">
+            ⚠ {sizeError}
+          </p>
+        )}
+        {tooShortWarning && !sizeError && (
+          <p data-testid="short-warning" className="text-xs font-mono text-cyber-amber">
+            ⚡ Email is very short — make sure headers are included for best results
+          </p>
+        )}
+
+        <div className="flex items-center gap-3">
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            data-testid="analyze-button"
+            className="rounded border border-cyber-cyan bg-cyber-cyan/10
+                       px-6 py-2.5 font-mono text-sm font-semibold text-cyber-cyan
+                       tracking-widest uppercase transition-all
+                       hover:bg-cyber-cyan/20 hover:shadow-[0_0_20px_rgba(0,212,255,0.3)]
+                       disabled:opacity-30 disabled:cursor-not-allowed
+                       animate-pulse-glow"
+          >
+            {loading ? "ANALYZING…" : "ANALYZE THREAT"}
+          </button>
+          <span className="text-xs font-mono text-cyber-muted hidden sm:block">
+            or{" "}
+            <kbd className="px-1 py-0.5 rounded border border-cyber-border bg-gray-900 text-gray-400">
+              Ctrl
+            </kbd>
+            {" + "}
+            <kbd className="px-1 py-0.5 rounded border border-cyber-border bg-gray-900 text-gray-400">
+              Enter
+            </kbd>
+          </span>
+        </div>
       </form>
 
       {loading && (

@@ -1,11 +1,28 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import List, Optional
+
+EMAIL_MIN_CHARS = 10
+EMAIL_MAX_CHARS = 500_000
 
 
 # ── Input ──────────────────────────────────────────────────────────────────────
 
 class EmailAnalysisRequest(BaseModel):
     raw_email: str
+
+    @field_validator("raw_email")
+    @classmethod
+    def validate_size(cls, v: str) -> str:
+        stripped = v.strip()
+        if len(stripped) < EMAIL_MIN_CHARS:
+            raise ValueError(
+                f"raw_email must be at least {EMAIL_MIN_CHARS} characters after stripping whitespace"
+            )
+        if len(stripped) > EMAIL_MAX_CHARS:
+            raise ValueError(
+                f"raw_email exceeds the 500KB limit ({len(stripped):,} chars)"
+            )
+        return stripped
 
 
 # ── Parser sub-models ──────────────────────────────────────────────────────────
@@ -35,7 +52,6 @@ class SuspiciousHeaderFlags(BaseModel):
 
 
 class ParsedEmail(BaseModel):
-    # Headers
     from_address: str
     from_display_name: Optional[str]
     to_addresses: List[str]
@@ -45,22 +61,18 @@ class ParsedEmail(BaseModel):
     message_id: Optional[str]
     return_path: Optional[str]
     received_hops: List[str]
-    # Auth
     authentication: EmailAuthentication
-    # Body
     plain_text_body: Optional[str]
     html_body: Optional[str]
-    # Extracted artefacts
     urls: List[str]
     attachments: List[Attachment]
-    # Anomaly flags
     suspicious_flags: SuspiciousHeaderFlags
 
 
 # ── Analysis models ────────────────────────────────────────────────────────────
 
 class IOC(BaseModel):
-    type: str     # "url" | "ip" | "domain" | "email"
+    type: str
     value: str
     context: str
 
@@ -84,7 +96,7 @@ class AnalysisResponse(BaseModel):
     parsed_email: ParsedEmail
 
 
-# ── Legacy aliases (kept so Phase 1 tests still compile) ──────────────────────
+# ── Legacy aliases ────────────────────────────────────────────────────────────
 
 class EmailInput(EmailAnalysisRequest):
     pass

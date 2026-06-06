@@ -4,6 +4,7 @@ anthropic==0.40.0
 python-dotenv==1.0.1
 pydantic==2.10.3
 python-multipart==0.0.17
+slowapi==0.1.9
 pytest==8.3.4
 pytest-asyncio==0.24.0
 httpx==0.28.1

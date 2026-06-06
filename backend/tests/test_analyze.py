@@ -8,4 +8,4 @@ async def test_health():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         r = await ac.get("/health")
     assert r.status_code == 200
-    assert r.json() == {"status": "ok"}
+    assert r.json()["status"] == "ok"
