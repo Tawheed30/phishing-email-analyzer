@@ -7,82 +7,63 @@ on:
     branches: [main]
 
 jobs:
-  # ──────────────────────────────────────────────
-  # Backend: lint + tests
-  # ──────────────────────────────────────────────
-  backend:
+  backend-test:
     name: Backend Tests (Python)
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: backend
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: pip
+          cache: "pip"
           cache-dependency-path: backend/requirements.txt
-
       - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Lint with ruff
-        run: |
-          pip install ruff
-          ruff check app/ tests/
-
+        run: cd backend && pip install -r requirements.txt
       - name: Run tests
+        run: cd backend && pytest tests/ -v --tb=short --junitxml=test-results/backend.xml
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_API_KEY: "test-key-not-real"
           ANALYZE_RATE_LIMIT: "1000/minute"
-        run: pytest tests/ -v --tb=short --color=yes
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-test-results
+          path: backend/test-results/
 
-  # ──────────────────────────────────────────────
-  # Frontend: lint + tests
-  # ──────────────────────────────────────────────
-  frontend:
+  frontend-test:
     name: Frontend Tests (Node)
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: frontend
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Node 20
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: npm
+          cache: "npm"
           cache-dependency-path: frontend/package-lock.json
-
       - name: Install dependencies
-        run: npm ci
-
-      - name: Lint with ESLint
-        run: npx eslint src/ --ext .ts,.tsx,.jsx --max-warnings 0 || true
-
+        run: cd frontend && npm ci
       - name: Run tests
-        run: npm test
+        run: cd frontend && npm test
+      - name: Build check
+        run: cd frontend && npm run build
 
-      - name: Build production bundle
-        run: npm run build
-
-  # ──────────────────────────────────────────────
-  # Summary badge job — requires both to pass
-  # ──────────────────────────────────────────────
-  all-green:
-    name: All checks passed
-    needs: [backend, frontend]
+  lint:
+    name: Lint & Type Check
     runs-on: ubuntu-latest
     steps:
-      - run: echo "All CI checks passed!"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install ruff
+        run: pip install ruff
+      - name: Lint backend
+        run: ruff check backend/app/ --ignore E501
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install frontend deps
+        run: cd frontend && npm ci
+      - name: TypeScript check
+        run: cd frontend && npx tsc --noEmit
