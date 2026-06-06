@@ -35,8 +35,7 @@ async def test_exactly_min_length_passes():
     payload = "x" * EMAIL_MIN_CHARS
     from unittest.mock import AsyncMock, patch
     from app.services.email_parser import EmailParser
-    from app.services.ai_analyzer import AIAnalyzer
-    from app.models.schemas import AnalysisResponse, IOC, MitreTTP
+    from app.models.schemas import AnalysisResponse
 
     parsed = EmailParser().parse(payload)
     mock_resp = AnalysisResponse(

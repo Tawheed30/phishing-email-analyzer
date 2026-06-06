@@ -11,7 +11,7 @@ import anthropic
 import pytest
 from fastapi import HTTPException
 
-from app.services.ai_analyzer import AIAnalyzer, _build_user_prompt
+from app.services.ai_analyzer import AIAnalyzer
 from app.services.email_parser import EmailParser
 from tests.fixtures import CLEAN_EMAIL, PHISHING_EMAIL, SUSPICIOUS_EMAIL
 

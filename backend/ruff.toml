@@ -1,0 +1,10 @@
+# Ruff configuration for the phishing-email-analyzer backend
+line-length = 100
+target-version = "py311"
+
+[lint]
+select = ["F", "E", "W", "I"]
+ignore = ["E501"]  # line length handled by formatter
+
+[lint.isort]
+known-first-party = ["app"]

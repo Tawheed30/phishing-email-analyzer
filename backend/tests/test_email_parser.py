@@ -1,4 +1,3 @@
-import pytest
 from app.services.email_parser import EmailParser
 from tests.fixtures import (
     CLEAN_EMAIL,
